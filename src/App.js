@@ -83,6 +83,7 @@ export default function App() {
               result.map((item) => (
                 <div key={item.id} className="search-result-item">
                   {item.name}
+                  <p>{item.email}</p>
                 </div>
               ))}
           </div>
