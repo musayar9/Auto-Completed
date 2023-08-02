@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './style.css';
-
+import axios from 'axios';
 const data = [
   {
     id: 1,
@@ -28,7 +28,7 @@ export default function App() {
   const [result, setResult] = useState(false);
   const searchRef = useRef();
   const isTyping = search.replace(/\s+/, '').length > 0;
-
+  const [newData, setNewData] = useState([]);
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
@@ -45,17 +45,28 @@ export default function App() {
   };
   useEffect(() => {
     /**burada search değişiğ ddeişmediğne bakacağiz */
+    axios
+      .get('https://jsonplaceholder.typicode.com/users')
+      .then((response) => {
+        setNewData(response.data);
+      })
+      .catch((err) => console.log(err));
     if (isTyping) {
       //buradakiler benim yazdığımı içeriyorsa filtreleyeceğim
-      const filteredResult = data.filter((item) =>
-        item.title.toLowerCase().includes(search.toLowerCase())
+      const filteredResult = newData.filter((item) =>
+        item.name.toLowerCase().includes(search.toLowerCase())
       );
+
+      //  const filteredResult = data.filter((item) =>
+      //    item.title.toLowerCase().includes(search.toLowerCase())
+      //  );
       setResult(filteredResult.length ? filteredResult : false);
     } else {
       //search boş veya değişiyorda set resultu boşa çek
       setResult(false);
     }
   }, [search]);
+  console.log(newData);
   return (
     <>
       <div className="search" ref={searchRef}>
@@ -71,7 +82,7 @@ export default function App() {
             {result &&
               result.map((item) => (
                 <div key={item.id} className="search-result-item">
-                  {item.title}
+                  {item.name}
                 </div>
               ))}
           </div>
