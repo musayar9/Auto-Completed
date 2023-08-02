@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './style.css';
 
 const data = [
@@ -25,26 +25,40 @@ const data = [
 
 export default function App() {
   const [search, setSearch] = useState('');
-  const [result, setResult] = useState([]);
-
+  const [result, setResult] = useState(false);
+  const searchRef = useRef();
   const isTyping = search.replace(/\s+/, '').length > 0;
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleClickOutside = (e) => {
+    console.log(e);
+    //tıkladpım elemen search div değil ise setSearch boş değerre çek
+    if (searchRef.current && !searchRef.current.contains(e.target)) {
+      setSearch('');
+    }
+  };
   useEffect(() => {
     /**burada search değişiğ ddeişmediğne bakacağiz */
     if (isTyping) {
       //buradakiler benim yazdığımı içeriyorsa filtreleyeceğim
-      setResult(
-        data.filter((item) =>
-          item.title.toLowerCase().includes(search.toLowerCase())
-        )
+      const filteredResult = data.filter((item) =>
+        item.title.toLowerCase().includes(search.toLowerCase())
       );
+      setResult(filteredResult.length ? filteredResult : false);
     } else {
       //search boş veya değişiyorda set resultu boşa çek
-      setResult([]);
+      setResult(false);
     }
   }, [search]);
   return (
     <>
-      <div className="search">
+      <div className="search" ref={searchRef}>
         <input
           className={isTyping ? 'typing' : null}
           type="text"
@@ -52,19 +66,22 @@ export default function App() {
           onChange={(e) => setSearch(e.target.value)}
           placeholder="birşeyler Ara"
         />
-        {result.length > 0 ? (
+        {isTyping && (
           <div className="search-result">
-            {result.map((item) => (
-              <div key={item.id} className="search-result-item">
-                {item.title}
-              </div>
-            ))}
+            {result &&
+              result.map((item) => (
+                <div key={item.id} className="search-result-item">
+                  {item.title}
+                </div>
+              ))}
           </div>
-        ) : (
-          <div className={`${(!search && 'try') || 'tryValue search-result'}`}>
-            <div className="search-result-item">
-              herhangi birr sonuç nulunmadıdi{' '}
-            </div>
+        )}
+
+        {!result && (
+          <div
+            className={`${(!isTyping && 'result-not-found') || 'result-found'}`}
+          >
+            "{search}" ile ilgili birşey bulunmadı{' '}
           </div>
         )}
       </div>
