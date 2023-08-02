@@ -1,38 +1,55 @@
-import React, { useState, useEffect, useRef } from 'react';
-import './style.css';
-import axios from 'axios';
+import React, { useState, useEffect, useRef } from "react";
+import "./style.css";
+import axios from "axios";
+import ContentLoader from "react-content-loader";
 const data = [
   {
     id: 1,
-    title: 'test 1',
+    title: "test 1",
   },
 
   {
     id: 2,
-    title: 'test 2',
+    title: "test 2",
   },
 
   {
     id: 3,
-    title: 'test 3',
+    title: "test 3",
   },
 
   {
     id: 4,
-    title: 'test 4',
+    title: "test 4",
   },
 ];
 
+const AotoComplete = () => (
+  <ContentLoader
+    speed={2}
+    width={400}
+    height={460}
+    viewBox="0 0 400 460"
+    backgroundColor="#ffffff"
+    foregroundColor="#ecebeb"
+  >
+    <rect x="57" y="60" rx="2" ry="2" width="140" height="10" />
+    <rect x="58" y="33" rx="2" ry="2" width="140" height="10" />
+    <rect x="58" y="10" rx="2" ry="2" width="140" height="10" />
+  </ContentLoader>
+);
+
 export default function App() {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [result, setResult] = useState(false);
+  const [loading, setLoadin] = useState(false);
   const searchRef = useRef();
-  const isTyping = search.replace(/\s+/, '').length > 0;
+  const isTyping = search.replace(/\s+/, "").length > 0;
   const [newData, setNewData] = useState([]);
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -40,22 +57,19 @@ export default function App() {
     console.log(e);
     //tıkladpım elemen search div değil ise setSearch boş değerre çek
     if (searchRef.current && !searchRef.current.contains(e.target)) {
-      setSearch('');
+      setSearch("");
     }
+  };
+
+  const getResultItem = (item) => {
+    console.log(item);
+    setSearch(item.name);
   };
   useEffect(() => {
     /**burada search değişiğ ddeişmediğne bakacağiz */
-    const getData = setTimeout(()=>{
-          axios
-            .get("https://jsonplaceholder.typicode.com/users")
-            .then((response) => {
-              setNewData(response.data);
-            })
-            .catch((err) => console.log(err));
-    },500)
-    
-  
+
     if (isTyping) {
+      setLoadin(true);
       //buradakiler benim yazdığımı içeriyorsa filtreleyeceğim
       const filteredResult = newData.filter((item) =>
         item.name.toLowerCase().includes(search.toLowerCase())
@@ -65,23 +79,32 @@ export default function App() {
       //    item.title.toLowerCase().includes(search.toLowerCase())
       //  );
       setResult(filteredResult.length ? filteredResult : false);
+
+      const getData = setTimeout(() => {
+        axios
+          .get("https://jsonplaceholder.typicode.com/users")
+          .then((response) => {
+            setNewData(response.data);
+            setLoadin(false);
+          })
+          .catch((err) => console.log(err));
+      }, 1000);
+
+      return () => {
+        clearTimeout(getData);
+        setLoadin(false);
+      };
     } else {
       //search boş veya değişiyorda set resultu boşa çek
       setResult(false);
     }
-    
-      return () => {
-        clearTimeout(getData);
-      };
-    
-    
   }, [search]);
   console.log(newData);
   return (
     <>
       <div className="search" ref={searchRef}>
         <input
-          className={isTyping ? 'typing' : null}
+          className={isTyping ? "typing" : null}
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -91,7 +114,11 @@ export default function App() {
           <div className="search-result">
             {result &&
               result.map((item) => (
-                <div key={item.id} className="search-result-item">
+                <div
+                  onClick={() => getResultItem(item)}
+                  key={item.id}
+                  className="search-result-item"
+                >
                   {item.name}
                   <p>{item.email}</p>
                   <p>Phone: {item.phone}</p>
@@ -99,12 +126,12 @@ export default function App() {
               ))}
           </div>
         )}
-
-        {!result && (
+        {loading && <AotoComplete />}
+        {!result && !loading && (
           <div
-            className={`${(!isTyping && 'result-not-found') || 'result-found'}`}
+            className={`${(!isTyping && "result-not-found") || "result-found"}`}
           >
-            "{search}" ile ilgili birşey bulunmadı{' '}
+            "{search}" ile ilgili birşey bulunmadı{" "}
           </div>
         )}
       </div>

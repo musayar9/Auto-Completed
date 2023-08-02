@@ -43,6 +43,8 @@ body {
   border-radius: 0 0 10px 10px;
   background: #2476ce;
   margin-top: 5px;
+  max-height: 400px;
+  overflow: auto;
 }
 
 .search .search-result .search-result-item {
