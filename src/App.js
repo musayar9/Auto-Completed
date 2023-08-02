@@ -45,12 +45,16 @@ export default function App() {
   };
   useEffect(() => {
     /**burada search değişiğ ddeişmediğne bakacağiz */
-    axios
-      .get('https://jsonplaceholder.typicode.com/users')
-      .then((response) => {
-        setNewData(response.data);
-      })
-      .catch((err) => console.log(err));
+    const getData = setTimeout(()=>{
+          axios
+            .get("https://jsonplaceholder.typicode.com/users")
+            .then((response) => {
+              setNewData(response.data);
+            })
+            .catch((err) => console.log(err));
+    },500)
+    
+  
     if (isTyping) {
       //buradakiler benim yazdığımı içeriyorsa filtreleyeceğim
       const filteredResult = newData.filter((item) =>
@@ -65,6 +69,12 @@ export default function App() {
       //search boş veya değişiyorda set resultu boşa çek
       setResult(false);
     }
+    
+      return () => {
+        clearTimeout(getData);
+      };
+    
+    
   }, [search]);
   console.log(newData);
   return (
@@ -84,6 +94,7 @@ export default function App() {
                 <div key={item.id} className="search-result-item">
                   {item.name}
                   <p>{item.email}</p>
+                  <p>Phone: {item.phone}</p>
                 </div>
               ))}
           </div>
