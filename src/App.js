@@ -113,6 +113,7 @@ export default function App() {
         {isTyping && (
           <div className="search-result">
             {result &&
+              loading === false &&
               result.map((item) => (
                 <div
                   onClick={() => getResultItem(item)}
@@ -126,7 +127,8 @@ export default function App() {
               ))}
           </div>
         )}
-        {loading && <AotoComplete />}
+        {/* {loading && new Array(3).fill().map(() => <AotoComplete />)} */}
+        {loading &&  <AotoComplete />}
         {!result && !loading && (
           <div
             className={`${(!isTyping && "result-not-found") || "result-found"}`}
